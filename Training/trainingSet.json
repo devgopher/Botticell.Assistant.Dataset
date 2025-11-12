@@ -857,259 +857,375 @@
 		"output": "Use AddBotCommand<AiCommand, AiCommandProcessor<ReplyKeyboardMarkup>, PassValidator<AiCommand>>() and AddTelegramLayoutsSupport(); provide a layout supplier implementation that converts AiLayout into ReplyKeyboardMarkup for Telegram."
 	},
 	{
-        "input": "How to set up a Telegram bot with dependency injection in .NET?",
-        "output": "Use builder.Services.AddTelegramBot(builder.Configuration).Prepare() to register the Telegram bot with configuration, then add required services like logging, layout parsers, command processors, and validators through the service collection."
-    },
-    {
-        "input": "How to register command processors for a Telegram bot?",
-        "output": "Use builder.Services.AddSingleton for each command processor type like StartCommandProcessor<ReplyKeyboardMarkup>, StopCommandProcessor<ReplyKeyboardMarkup>, and InfoCommandProcessor<ReplyKeyboardMarkup> to make them available as singletons in the dependency injection container."
-    },
-    {
-        "input": "How to configure command validators in Botticelli framework?",
-        "output": "Register scoped validators using builder.Services.AddScoped<ICommandValidator<TCommand>, PassValidator<TCommand>> for each command type, where PassValidator provides pass-through validation logic."
-    },
-    {
-        "input": "How to set up Entity Framework with PostgreSQL in a bot application?",
-        "output": "Use builder.Services.AddDbContext<CookBookDbContext> with opt.UseNpgsql(connection) and configure QueryTrackingBehavior as NoTracking for better performance when using PostgreSQL database."
-    },
-    {
-        "input": "How to register bot commands with processors and validators?",
-        "output": "Use builder.Services.AddBotCommand<TCommand>().AddProcessor<TProcessor>().AddValidator<TValidator>() for each command to wire up the command with its processor and validation logic."
-    },
-    {
-        "input": "How to implement chained commands in Botticelli framework?",
-        "output": "Use builder.Services.AddBotChainProcessedCommand<TCommand, TValidator>().AddNext<TProcessor1>().AddNext<TProcessor2>() to create command chains where multiple processors execute sequentially for a single command."
-    },
-    {
-        "input": "How to finalize bot setup and start the application?",
-        "output": "After building the app with var app = builder.Build(), register chained commands with app.Services.RegisterBotChainedCommand<TCommand, TBot>(), call UseTelegramBot() to configure the bot middleware, and finally await app.RunAsync() to start the application."
-    },
-    {
-        "input": "What's the purpose of AddTelegramLayoutsSupport in bot configuration?",
-        "output": "AddTelegramLayoutsSupport enables support for Telegram-specific UI layouts and reply keyboards, allowing the bot to work with ReplyKeyboardMarkup and other Telegram interface elements."
-    },
-	 {
-        "input": "How to create a custom command in Botticelli framework?",
-        "output": "Create a class that implements ICommand interface with a Guid Id property. Use XML documentation to describe the command purpose, like 'Find a recipe by keywords' for FindRecipeCommand."
-    },
-    {
-        "input": "How to implement a command chain processor that waits for user response?",
-        "output": "Inherit from WaitForClientResponseCommandChainProcessor<TCommand> and override the InnerProcess method to handle the initial command, and other InnerProcess* methods for different message types like contact, poll, or location."
-    },
-    {
-        "input": "What methods need to be overridden in a command chain processor?",
-        "output": "Override InnerProcess for regular messages, InnerProcessContact for contact messages, InnerProcessPoll for poll messages, and InnerProcessLocation for location messages. Each should return Task.CompletedTask if not implemented."
-    },
-    {
-        "input": "How to send a response message to user in a command processor?",
-        "output": "Create a new Message object with ChatIdInnerIdLinks and ChatIds from the incoming message, set Body with the response text, and use SendMessage(responseMessage, token) to deliver it to the user."
-    },
-    {
-        "input": "What dependencies are required for a command chain processor?",
-        "output": "A command chain processor requires ILogger for logging, ICommandValidator for command validation, MetricsProcessor for analytics, and IValidator<Message> for message validation, which are passed to the base constructor."
-    },
-    {
-        "input": "How to prompt user for input in a Telegram bot command?",
-        "output": "In the InnerProcess method, create a response message with instructions like 'Enter ingredients (for example: \\\"egg garlic\\\")' and send it using SendMessage to guide the user for the next input."
-    },
-    {
-        "input": "What is the purpose of WaitForClientResponseCommandChainProcessor?",
-        "output": "WaitForClientResponseCommandChainProcessor is designed for multi-step interactions where the bot sends a prompt and waits for the user's response, enabling conversational command flows."
-    },
-    {
-        "input": "How to handle different message types in a command processor?",
-        "output": "Override the specific InnerProcess methods: InnerProcess for text messages, InnerProcessContact for contact sharing, InnerProcessPoll for polls, and InnerProcessLocation for location sharing, each receiving the message and cancellation token."
-    },
-    {
-        "input": "What should be included in a response message when prompting user?",
-        "output": "Include ChatIdInnerIdLinks and ChatIds from the incoming message to maintain conversation context, set Body with clear instructions, and optionally set Subject for message title."
-    },
-    {
-        "input": "How to implement a recipe search command that asks for ingredients?",
-        "output": "Create a FindRecipeCommand processor that inherits from WaitForClientResponseCommandChainProcessor, override InnerProcess to send a prompt message asking users to enter ingredients, then handle the response in subsequent processor steps."
-    },
-	    {
-        "input": "How to implement a command processor with database context and layout support?",
-        "output": "Create a class inheriting from CommandChainProcessor<TCommand> with generic TReplyMarkup constraint. Inject CookBookDbContext for database access and ILayoutSupplier/ILayoutParser for UI layouts. Initialize response markup in constructor using Init method."
-    },
-    {
-        "input": "How to search recipes by ingredients in a bot command processor?",
-        "output": "Split message.ProcessingArgs[0] by space to get ingredients, query Ingredients table for matching names, use Ingredient2Recipes junction table to find recipes containing all specified ingredients, then retrieve full recipe details from RecipesDatasets."
-    },
-    {
-        "input": "How to implement complex LINQ queries for recipe search with multiple ingredients?",
-        "output": "Use Where clause to filter ingredients by name, GroupBy recipe ID in Ingredient2Recipes, then filter groups where all searched ingredient IDs are present using All/Any conditions, finally select distinct recipe IDs and join with RecipesDatasets."
-    },
-    {
-        "input": "How to format and send recipe results with rich text in Telegram bot?",
-        "output": "Use StringBuilder to create formatted message with emojis: add recipe title with checkmarks, ingredients list with checkboxes, directions with numbered steps, and include recipe link. Send each recipe as separate message with 2-second delay between them."
-    },
-    {
-        "input": "How to handle no results found scenario in a bot command?",
-        "output": "Check if recipes list is empty, if so set message.Body to '🚫 No recipes were found!' and send a single error message using SendMessageRequest with the configured options."
-    },
-    {
-        "input": "How to implement random recipe selection from search results?",
-        "output": "Use OrderBy(o => Random.Shared.Next()) on recipes collection to shuffle results randomly, then Take(3) to select top 3 recipes from the randomized list for variety in responses."
-    },
-    {
-        "input": "How to initialize and use reply markup layouts in command processors?",
-        "output": "Create Init method that uses ILayoutParser.ParseFromFile to load layout from JSON file in assembly directory, then use ILayoutSupplier.GetMarkup to convert layout to TReplyMarkup object for use in SendOptionsBuilder."
-    },
-    {
-        "input": "How to send multiple messages with delay in a bot command processor?",
-        "output": "Loop through recipes collection, format each recipe as separate message, create SendMessageRequest for each, call SendMessage with request and options, then use Task.Delay(2000, token) between messages to avoid rate limiting."
-    },
-    {
-        "input": "How to process string arrays from message arguments in bot commands?",
-        "output": "Access message.ProcessingArgs[0], split by space to get individual items, convert to lowercase using ToLowerInvariant() for case-insensitive matching, then use in LINQ queries against database."
-    },
-    {
-        "input": "How to clean and format JSON array strings from database for display?",
-        "output": "Use Replace() methods to remove brackets and quotes from Ingredients and Directions fields: Replace('[', string.Empty).Replace(']', string.Empty).Replace('\\\"', string.Empty), then Split(',') to create individual items for display."
-    },
-    {
-        "input": "What's the purpose of SendOptionsBuilder in message sending?",
-        "output": "SendOptionsBuilder<TReplyMarkup> creates send options with reply markup (keyboards, buttons) that are passed to SendMessage method to control how messages are displayed and what interactive elements are available to users."
-    },
-    {
-        "input": "How to implement proper resource cleanup in command processors?",
-        "output": "Clear message.ProcessingArgs by setting to empty array after processing, use StringBuilder for efficient string construction, and ensure proper cancellation token propagation in async operations."
-    },
-	    {
-        "input": "How to implement a simple stop command processor in Botticelli framework?",
-        "output": "Create a class inheriting from CommandProcessor<StopCommand> with generic TReplyMarkup constraint. Implement constructors that initialize layout options and override InnerProcess method to send farewell message when command is executed."
-    },
-    {
-        "input": "How to handle multiple constructor overloads in command processors?",
-        "output": "Provide multiple constructors with different parameter sets - one with minimal dependencies (logger, validator, layout suppliers) and another with additional MetricsProcessor. Both constructors should call base constructors and initialize common components through Init method."
-    },
-    {
-        "input": "How to initialize reply markup layouts in command processors?",
-        "output": "Create private Init method that uses Assembly.GetExecutingAssembly().Location to get assembly directory, ILayoutParser.ParseFromFile to load layout from JSON file, and ILayoutSupplier.GetMarkup to convert to TReplyMarkup for use in SendOptionsBuilder."
-    },
-    {
-        "input": "How to send farewell message when stopping a bot?",
-        "output": "In InnerProcess method, create SendMessageRequest with new Message containing unique Uid (Guid.NewGuid()), copy ChatIds from incoming message, set Body to 'Bot stopped...', and send using SendMessage with configured options."
-    },
-    {
-        "input": "How to handle different message types in a simple command processor?",
-        "output": "Override InnerProcessContact, InnerProcessPoll, and InnerProcessLocation methods to return Task.CompletedTask for message types that don't require specific handling in stop command context."
-    },
-    {
-        "input": "What's the difference between CommandProcessor and CommandChainProcessor?",
-        "output": "CommandProcessor is for single-step commands like StopCommand that execute immediately, while CommandChainProcessor is for multi-step conversational flows that require waiting for user responses and processing through multiple stages."
-    },
-    {
-        "input": "How to ensure proper message Uid generation in bot responses?",
-        "output": "Use Guid.NewGuid().ToString() to generate unique identifier for each outgoing message, ensuring proper message tracking and preventing duplicate processing in the messaging system."
-    },
-    {
-        "input": "How to reuse the same layout for different commands?",
-        "output": "Load layout from shared JSON file (like 'start_layout.json') in multiple command processors' Init methods, allowing consistent UI/UX across different bot commands while maintaining separation of concerns."
-    },
-    {
-        "input": "What dependencies are optional in command processor constructors?",
-        "output": "MetricsProcessor is optional and can be null, as shown by the question mark in MetricsProcessor? parameter and the constructor overload without it, providing flexibility depending on analytics requirements."
-    },
-    {
-        "input": "How to maintain chat context when sending response messages?",
-        "output": "Copy ChatIds from the incoming message to the response message to ensure the bot responds in the same chat context where the command was received, maintaining conversation continuity."
-    },
-    {
-        "input": "When to use Task.CompletedTask in message processing methods?",
-        "output": "Return Task.CompletedTask for overridden methods like InnerProcessContact, InnerProcessPoll, and InnerProcessLocation when the command doesn't need to handle those specific message types, providing empty but valid implementation."
-    },
-    {
-        "input": "How to structure command processors for different complexity levels?",
-        "output": "Use CommandProcessor for simple one-shot commands (like StopCommand) and CommandChainProcessor for complex multi-step interactions (like FindRecipeCommand), choosing based on whether the command requires conversational flow or immediate execution."
-    },
-	    {
-        "input": "How to implement a start command processor with reply markup in Botticelli?",
-        "output": "Create a class inheriting from CommandProcessor<StartCommand> with TReplyMarkup constraint. Initialize SendOptionsBuilder with markup from layout file in constructors:\n\n```csharp\npublic class StartCommandProcessor<TReplyMarkup> : CommandProcessor<StartCommand> where TReplyMarkup : class\n{\n    private readonly SendOptionsBuilder<TReplyMarkup>? _options;\n\n    public StartCommandProcessor(ILogger<StartCommandProcessor<TReplyMarkup>> logger,\n        ICommandValidator<StartCommand> commandValidator,\n        ILayoutSupplier<TReplyMarkup> layoutSupplier,\n        ILayoutParser layoutParser,\n        IValidator<Message> messageValidator)\n        : base(logger, commandValidator, messageValidator)\n    {\n        var responseMarkup = Init(layoutSupplier, layoutParser);\n        _options = SendOptionsBuilder<TReplyMarkup>.CreateBuilder(responseMarkup);\n    }\n```\n\nOverride InnerProcess to send greeting message with the configured options."
-    },
-    {
-        "input": "How to initialize reply markup from JSON layout file in command processors?",
-        "output": "Create static Init method that loads layout from JSON file:\n\n```csharp\nprivate static TReplyMarkup Init(ILayoutSupplier<TReplyMarkup> layoutSupplier, ILayoutParser layoutParser)\n{\n    var location = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;\n    var responseLayout = layoutParser.ParseFromFile(Path.Combine(location, \"start_layout.json\"));\n    var responseMarkup = layoutSupplier.GetMarkup(responseLayout);\n    return responseMarkup;\n}\n```\n\nThis method uses Assembly.GetExecutingAssembly().Location to get assembly directory, ILayoutParser.ParseFromFile to load layout, and ILayoutSupplier.GetMarkup to convert to TReplyMarkup."
-    },
-    {
-        "input": "How to send greeting message when starting a bot?",
-        "output": "In InnerProcess method, create and send greeting message:\n\n```csharp\nprotected override async Task InnerProcess(Message message, CancellationToken token)\n{\n    var greetingMessageRequest = new SendMessageRequest\n    {\n        Message = new Message\n        {\n            ChatIds = message.ChatIds,\n            Body = \"Bot started...\"\n        }\n    };\n\n    await SendMessage(greetingMessageRequest, _options, token);\n}\n```\n\nCreate SendMessageRequest with new Message containing ChatIds from incoming message and Body set to greeting text."
-    },
-    {
-        "input": "How to handle unsupported message types in command processors?",
-        "output": "Override message type handlers to return Task.CompletedTask:\n\n```csharp\nprotected override Task InnerProcessContact(Message message, CancellationToken token) => Task.CompletedTask;\nprotected override Task InnerProcessPoll(Message message, CancellationToken token) => Task.CompletedTask;\nprotected override Task InnerProcessLocation(Message message, CancellationToken token) => Task.CompletedTask;\n```\n\nUsing expression-bodied members with => Task.CompletedTask for compact syntax, indicating these message types aren't handled."
-    },
-    {
-        "input": "What's the pattern for constructor overloading in command processors?",
-        "output": "Provide multiple constructors with different dependency sets:\n\n```csharp\n// Constructor without MetricsProcessor\npublic StartCommandProcessor(ILogger<StartCommandProcessor<TReplyMarkup>> logger,\n    ICommandValidator<StartCommand> commandValidator,\n    ILayoutSupplier<TReplyMarkup> layoutSupplier,\n    ILayoutParser layoutParser,\n    IValidator<Message> messageValidator)\n    : base(logger, commandValidator, messageValidator)\n{\n    var responseMarkup = Init(layoutSupplier, layoutParser);\n    _options = SendOptionsBuilder<TReplyMarkup>.CreateBuilder(responseMarkup);\n}\n\n// Constructor with optional MetricsProcessor\npublic StartCommandProcessor(ILogger<StartCommandProcessor<TReplyMarkup>> logger,\n    ICommandValidator<StartCommand> commandValidator,\n    ILayoutSupplier<TReplyMarkup> layoutSupplier,\n    ILayoutParser layoutParser,\n    IValidator<Message> messageValidator,\n    MetricsProcessor? metricsProcessor)\n    : base(logger, commandValidator, messageValidator, metricsProcessor)\n{\n    var responseMarkup = Init(layoutSupplier, layoutParser);\n    _options = SendOptionsBuilder<TReplyMarkup>.CreateBuilder(responseMarkup);\n}\n```\n\nBoth call appropriate base constructors and initialize markup options consistently."
-    },
-    {
-        "input": "How to implement a stop command processor similar to start command?",
-        "output": "Follow the same pattern as StartCommandProcessor but with StopCommand:\n\n```csharp\npublic class StopCommandProcessor<TReplyMarkup> : CommandProcessor<StopCommand> where TReplyMarkup : class\n{\n    private SendOptionsBuilder<TReplyMarkup>? _options;\n\n    public StopCommandProcessor(ILogger<StopCommandProcessor<TReplyMarkup>> logger,\n        ICommandValidator<StopCommand> commandValidator,\n        ILayoutSupplier<TReplyMarkup> layoutSupplier,\n        ILayoutParser layoutParser,\n        IValidator<Message> messageValidator)\n        : base(logger, commandValidator, messageValidator)\n    {\n        Init(layoutSupplier, layoutParser);\n    }\n\n    protected override async Task InnerProcess(Message message, CancellationToken token)\n    {\n        var farewellMessageRequest = new SendMessageRequest\n        {\n            Message = new Message\n            {\n                Uid = Guid.NewGuid().ToString(),\n                ChatIds = message.ChatIds,\n                Body = \"Bot stopped...\"\n            }\n        };\n        await SendMessage(farewellMessageRequest, _options, token);\n    }\n}\n```\n\nMain difference is the farewell message content and optional Uid generation."
-    },
-	    {
-        "input": "How to implement a recipe search command processor with database queries?",
-        "output": "Create a CommandChainProcessor that searches recipes by ingredients:\n\n```csharp\npublic class GetRecipeCommandProcessor<TReplyMarkup> : CommandChainProcessor<FindRecipeCommand> where TReplyMarkup : class\n{\n    private readonly CookBookDbContext _context;\n    private readonly SendOptionsBuilder<TReplyMarkup>? _options;\n    \n    public GetRecipeCommandProcessor(ILogger<CommandChainProcessor<FindRecipeCommand>> logger,\n        ILayoutSupplier<TReplyMarkup> layoutSupplier,\n        ILayoutParser layoutParser,\n        ICommandValidator<FindRecipeCommand> commandValidator,\n        MetricsProcessor metricsProcessor,\n        IValidator<Message> messageValidator, CookBookDbContext context) : base(logger,\n        commandValidator,\n        metricsProcessor,\n        messageValidator)\n    {\n        _context = context;\n        var responseMarkup = Init(layoutSupplier, layoutParser);\n        _options = SendOptionsBuilder<TReplyMarkup>.CreateBuilder(responseMarkup);\n    }\n```\n\nInject CookBookDbContext for database access and initialize reply markup options."
-    },
-    {
-        "input": "How to process ingredient search arguments in a bot command?",
-        "output": "Extract and process ingredients from message arguments:\n\n```csharp\npublic override async Task ProcessAsync(Message message, CancellationToken token)\n{\n    if (message.ProcessingArgs == null || !message.ProcessingArgs.Any())\n        return;\n\n    var ingredients = message.ProcessingArgs[0].Split(\" \").Select(i => i.ToLowerInvariant());\n```\n\nSplit the first ProcessingArg by spaces and convert to lowercase for case-insensitive matching."
-    },
-    {
-        "input": "How to query database for recipes containing multiple ingredients?",
-        "output": "Use LINQ queries with grouping and filtering:\n\n```csharp\nvar ingredientIds = _context.Ingredients.Where(i => ingredients.Contains(i.Name)).Select(i => i.Id).ToList();\n\nvar recipeLinkGroups = _context.Ingredient2Recipes\n    .Where(i => ingredientIds.Contains(i.IngredientId))\n    .GroupBy(i => i.RecipeId)\n    .ToList();\n\nvar recipeIds = recipeLinkGroups.Where(g => ingredientIds.All(x => g.Any(tt => tt.IngredientId == x)))\n    .SelectMany(rid => rid.Select(i => i.RecipeId))\n    .AsEnumerable()\n    .Distinct();\n```\n\nThis finds recipes that contain ALL specified ingredients by grouping and filtering."
-    },
-    {
-        "input": "How to format recipe results with emojis and clean formatting?",
-        "output": "Use StringBuilder to create formatted recipe display:\n\n```csharp\nforeach (var recipe in recipes.AsEnumerable().OrderBy(o => Random.Shared.Next()).Take(3))\n{\n    var sb = new StringBuilder();\n    sb.Append($\"\\u2714\\u2714 {recipe.Title} \\u2714\\u2714\\n\");\n    sb.Append(\"\\nIngredients: \\n\");\n    sb.AppendJoin('\\n', recipe.Ingredients?.Replace(\"[\", string.Empty).Replace(\"]\", string.Empty)\n        .Replace(\"\\\"\", string.Empty).Split(\",\").Select(i => $\"\\u2705 {i};\")!);\n    sb.Append(\"\\nSteps: \\n\");\n    sb.AppendJoin('\\n', recipe.Directions?.Replace(\"[\", string.Empty).Replace(\"]\", string.Empty)\n        .Replace(\"\\\"\", string.Empty).Split(\",\").Select(d => $\"\\u2705  {d};\")!);\n    sb.Append($\"\\n{recipe.Link}\\n\\n\");\n    message.Body = sb.ToString();\n```\n\nClean JSON arrays and add checkmark emojis for better visual presentation."
-    },
-    {
-        "input": "How to handle no results found and send multiple recipe messages?",
-        "output": "Check for empty results and send multiple messages with delay:\n\n```csharp\nif (!recipes.Any())\n{\n    message.Body = \"🚫 No recipes were found!\";\n    \n    var messageRequest = new SendMessageRequest\n    {\n        Message = message\n    };\n    \n    await SendMessage(messageRequest, _options, token);\n}\n\nforeach (var recipe in recipes.AsEnumerable().OrderBy(o => Random.Shared.Next()).Take(3))\n{\n    // Format recipe...\n    var messageRequest = new SendMessageRequest\n    {\n        Message = message\n    };\n    \n    await SendMessage(messageRequest, _options, token);\n    await Task.Delay(2000, token);\n}\n```\n\nSend error message if no recipes found, otherwise send up to 3 random recipes with 2-second delays."
-    },
-    {
-        "input": "How to initialize layout markup in command chain processors?",
-        "output": "Use static Init method to load layout from JSON file:\n\n```csharp\nprivate static TReplyMarkup Init(ILayoutSupplier<TReplyMarkup> layoutSupplier, ILayoutParser layoutParser)\n{\n    var location = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;\n    var responseLayout = layoutParser.ParseFromFile(Path.Combine(location, \"start_layout.json\"));\n    var responseMarkup = layoutSupplier.GetMarkup(responseLayout);\n    return responseMarkup;\n}\n```\n\nGet assembly directory, parse layout file, and convert to reply markup for message options."
-    },
-    {
-        "input": "How to implement random recipe selection from search results?",
-        "output": "Use Random.Shared to shuffle recipes and take top results:\n\n```csharp\nforeach (var recipe in recipes.AsEnumerable().OrderBy(o => Random.Shared.Next()).Take(3))\n{\n    // Process each recipe...\n}\n```\n\nOrderBy with Random.Shared.Next() randomizes the order, then Take(3) selects first 3 for variety."
-    },
-    {
-        "input": "How to clean and process JSON array strings from database for display?",
-        "output": "Remove brackets and quotes from JSON arrays:\n\n```csharp\nrecipe.Ingredients?.Replace(\"[\", string.Empty).Replace(\"]\", string.Empty)\n    .Replace(\"\\\"\", string.Empty).Split(\",\").Select(i => $\"\\u2705 {i};\")\n```\n\nRemove [ ] brackets and quotes, then split by commas to create individual items with checkmark emojis."
-    },
-	    {
-        "input": "How to set up monads-based command chains with Redis storage in Botticelli?",
-        "output": "Configure services with Redis storage and monads chain for command processing:\n\n```csharp\nvar builder = WebApplication.CreateBuilder(args);\n\nvar bot = builder.Services\n                 .AddTelegramBot(builder.Configuration)\n                 .Prepare();\n\nbuilder.Services\n    .AddLogging(cfg => cfg.AddNLog())\n    .AddTelegramLayoutsSupport();\n\nbuilder.Services\n    .AddChainedRedisStorage<string, string>(builder.Configuration)\n    .AddBotCommand<MathCommand>()\n    .AddMonadsChain<MathCommand, PassValidator<MathCommand>, ReplyKeyboardMarkup, ReplyTelegramLayoutSupplier>(builder.Services,\n                                                                                                                  cb => cb.Next<InputCommandProcessor<MathCommand>>()\n                                                                                                                          .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n                                                                                                                          .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n                                                                                                                          .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Cos)\n                                                                                                                          .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Abs)\n                                                                                                                          .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n                                                                                                                          .Next<OutputCommandProcessor<ReplyKeyboardMarkup, MathCommand>>());\n```\n\nThis sets up Redis storage for chain state and defines a mathematical processing pipeline."
-    },
-    {
-        "input": "How to create a mathematical processing pipeline with multiple transformations?",
-        "output": "Chain multiple TransformArgumentsProcessor with different math functions:\n\n```csharp\n.AddMonadsChain<MathCommand, PassValidator<MathCommand>, ReplyKeyboardMarkup, ReplyTelegramLayoutSupplier>(builder.Services,\n    cb => cb.Next<InputCommandProcessor<MathCommand>>()\n            .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n            .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n            .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Cos)\n            .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Abs)\n            .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n            .Next<OutputCommandProcessor<ReplyKeyboardMarkup, MathCommand>>());\n```\n\nThis creates a pipeline: Input → Sqrt → Sqrt → Cos → Abs → Sqrt → Output"
-    },
-    {
-        "input": "How to configure Redis storage for command chain state management?",
-        "output": "Use AddChainedRedisStorage extension method:\n\n```csharp\nbuilder.Services\n    .AddChainedRedisStorage<string, string>(builder.Configuration)\n```\n\nThis provides Redis-based storage for maintaining chain processor state between steps, using string keys and values."
-    },
-    {
-        "input": "What's the structure of a monads-based command chain configuration?",
-        "output": "A monads chain consists of typed processors in sequence:\n\n```csharp\n.AddMonadsChain<TCommand, TValidator, TReplyMarkup, TLayoutSupplier>(services,\n    chainBuilder => chainBuilder\n        .Next<FirstProcessor>()\n        .Next<SecondProcessor>(config => { /* configuration */ })\n        .Next<ThirdProcessor>()\n        .Next<OutputProcessor>());\n```\n\nWhere TCommand is the command type, TValidator handles validation, TReplyMarkup defines UI elements, and TLayoutSupplier provides layout support."
-    },
-    {
-        "input": "How to configure TransformArgumentsProcessor with custom functions?",
-        "output": "Set the SuccessFunc property with mathematical operations:\n\n```csharp\n.Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n.Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Cos)\n.Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Abs)\n```\n\nEach processor applies its function to the arguments, transforming them through the chain."
-    },
-    {
-        "input": "What are the required service registrations for monads chain processing?",
-        "output": "Register essential services before the chain:\n\n```csharp\nbuilder.Services\n    .AddTelegramBot(builder.Configuration)\n    .Prepare()\n    .AddLogging(cfg => cfg.AddNLog())\n    .AddTelegramLayoutsSupport()\n    .AddChainedRedisStorage<string, string>(builder.Configuration)\n    .AddBotCommand<MathCommand>();\n```\n\nThis includes bot setup, logging, layout support, Redis storage, and command registration."
-    },
-    {
-        "input": "How does the monads chain flow work from input to output?",
-        "output": "The chain processes data sequentially through configured processors:\n\n```csharp\nInputCommandProcessor<MathCommand>()\n→ TransformArgumentsProcessor (Math.Sqrt)\n→ TransformArgumentsProcessor (Math.Sqrt) \n→ TransformArgumentsProcessor (Math.Cos)\n→ TransformArgumentsProcessor (Math.Abs)\n→ TransformArgumentsProcessor (Math.Sqrt)\n→ OutputCommandProcessor<ReplyKeyboardMarkup, MathCommand>()\n```\n\nEach processor receives data from the previous one, applies transformation, and passes to the next."
-    },
-    {
-        "input": "What types of processors are available in monads chains?",
-        "output": "Common processor types include:\n\n```csharp\nInputCommandProcessor<TCommand> - Handles initial input\nTransformArgumentsProcessor<TCommand, T> - Transforms arguments with functions\nOutputCommandProcessor<TReplyMarkup, TCommand> - Handles final output\n```\n\nThese can be chained together to create complex processing pipelines with state persistence."
-    }
+		"input": "How to set up a Telegram bot with dependency injection in .NET?",
+		"output": "Use builder.Services.AddTelegramBot(builder.Configuration).Prepare() to register the Telegram bot with configuration, then add required services like logging, layout parsers, command processors, and validators through the service collection."
+	},
+	{
+		"input": "How to register command processors for a Telegram bot?",
+		"output": "Use builder.Services.AddSingleton for each command processor type like StartCommandProcessor<ReplyKeyboardMarkup>, StopCommandProcessor<ReplyKeyboardMarkup>, and InfoCommandProcessor<ReplyKeyboardMarkup> to make them available as singletons in the dependency injection container."
+	},
+	{
+		"input": "How to configure command validators in Botticelli framework?",
+		"output": "Register scoped validators using builder.Services.AddScoped<ICommandValidator<TCommand>, PassValidator<TCommand>> for each command type, where PassValidator provides pass-through validation logic."
+	},
+	{
+		"input": "How to set up Entity Framework with PostgreSQL in a bot application?",
+		"output": "Use builder.Services.AddDbContext<CookBookDbContext> with opt.UseNpgsql(connection) and configure QueryTrackingBehavior as NoTracking for better performance when using PostgreSQL database."
+	},
+	{
+		"input": "How to register bot commands with processors and validators?",
+		"output": "Use builder.Services.AddBotCommand<TCommand>().AddProcessor<TProcessor>().AddValidator<TValidator>() for each command to wire up the command with its processor and validation logic."
+	},
+	{
+		"input": "How to implement chained commands in Botticelli framework?",
+		"output": "Use builder.Services.AddBotChainProcessedCommand<TCommand, TValidator>().AddNext<TProcessor1>().AddNext<TProcessor2>() to create command chains where multiple processors execute sequentially for a single command."
+	},
+	{
+		"input": "How to finalize bot setup and start the application?",
+		"output": "After building the app with var app = builder.Build(), register chained commands with app.Services.RegisterBotChainedCommand<TCommand, TBot>(), call UseTelegramBot() to configure the bot middleware, and finally await app.RunAsync() to start the application."
+	},
+	{
+		"input": "What's the purpose of AddTelegramLayoutsSupport in bot configuration?",
+		"output": "AddTelegramLayoutsSupport enables support for Telegram-specific UI layouts and reply keyboards, allowing the bot to work with ReplyKeyboardMarkup and other Telegram interface elements."
+	},
+	{
+		"input": "How to create a custom command in Botticelli framework?",
+		"output": "Create a class that implements ICommand interface with a Guid Id property. Use XML documentation to describe the command purpose, like 'Find a recipe by keywords' for FindRecipeCommand."
+	},
+	{
+		"input": "How to implement a command chain processor that waits for user response?",
+		"output": "Inherit from WaitForClientResponseCommandChainProcessor<TCommand> and override the InnerProcess method to handle the initial command, and other InnerProcess* methods for different message types like contact, poll, or location."
+	},
+	{
+		"input": "What methods need to be overridden in a command chain processor?",
+		"output": "Override InnerProcess for regular messages, InnerProcessContact for contact messages, InnerProcessPoll for poll messages, and InnerProcessLocation for location messages. Each should return Task.CompletedTask if not implemented."
+	},
+	{
+		"input": "How to send a response message to user in a command processor?",
+		"output": "Create a new Message object with ChatIdInnerIdLinks and ChatIds from the incoming message, set Body with the response text, and use SendMessage(responseMessage, token) to deliver it to the user."
+	},
+	{
+		"input": "What dependencies are required for a command chain processor?",
+		"output": "A command chain processor requires ILogger for logging, ICommandValidator for command validation, MetricsProcessor for analytics, and IValidator<Message> for message validation, which are passed to the base constructor."
+	},
+	{
+		"input": "How to prompt user for input in a Telegram bot command?",
+		"output": "In the InnerProcess method, create a response message with instructions like 'Enter ingredients (for example: \\\"egg garlic\\\")' and send it using SendMessage to guide the user for the next input."
+	},
+	{
+		"input": "What is the purpose of WaitForClientResponseCommandChainProcessor?",
+		"output": "WaitForClientResponseCommandChainProcessor is designed for multi-step interactions where the bot sends a prompt and waits for the user's response, enabling conversational command flows."
+	},
+	{
+		"input": "How to handle different message types in a command processor?",
+		"output": "Override the specific InnerProcess methods: InnerProcess for text messages, InnerProcessContact for contact sharing, InnerProcessPoll for polls, and InnerProcessLocation for location sharing, each receiving the message and cancellation token."
+	},
+	{
+		"input": "What should be included in a response message when prompting user?",
+		"output": "Include ChatIdInnerIdLinks and ChatIds from the incoming message to maintain conversation context, set Body with clear instructions, and optionally set Subject for message title."
+	},
+	{
+		"input": "How to implement a recipe search command that asks for ingredients?",
+		"output": "Create a FindRecipeCommand processor that inherits from WaitForClientResponseCommandChainProcessor, override InnerProcess to send a prompt message asking users to enter ingredients, then handle the response in subsequent processor steps."
+	},
+	{
+		"input": "How to implement a command processor with database context and layout support?",
+		"output": "Create a class inheriting from CommandChainProcessor<TCommand> with generic TReplyMarkup constraint. Inject CookBookDbContext for database access and ILayoutSupplier/ILayoutParser for UI layouts. Initialize response markup in constructor using Init method."
+	},
+	{
+		"input": "How to search recipes by ingredients in a bot command processor?",
+		"output": "Split message.ProcessingArgs[0] by space to get ingredients, query Ingredients table for matching names, use Ingredient2Recipes junction table to find recipes containing all specified ingredients, then retrieve full recipe details from RecipesDatasets."
+	},
+	{
+		"input": "How to implement complex LINQ queries for recipe search with multiple ingredients?",
+		"output": "Use Where clause to filter ingredients by name, GroupBy recipe ID in Ingredient2Recipes, then filter groups where all searched ingredient IDs are present using All/Any conditions, finally select distinct recipe IDs and join with RecipesDatasets."
+	},
+	{
+		"input": "How to format and send recipe results with rich text in Telegram bot?",
+		"output": "Use StringBuilder to create formatted message with emojis: add recipe title with checkmarks, ingredients list with checkboxes, directions with numbered steps, and include recipe link. Send each recipe as separate message with 2-second delay between them."
+	},
+	{
+		"input": "How to handle no results found scenario in a bot command?",
+		"output": "Check if recipes list is empty, if so set message.Body to '🚫 No recipes were found!' and send a single error message using SendMessageRequest with the configured options."
+	},
+	{
+		"input": "How to implement random recipe selection from search results?",
+		"output": "Use OrderBy(o => Random.Shared.Next()) on recipes collection to shuffle results randomly, then Take(3) to select top 3 recipes from the randomized list for variety in responses."
+	},
+	{
+		"input": "How to initialize and use reply markup layouts in command processors?",
+		"output": "Create Init method that uses ILayoutParser.ParseFromFile to load layout from JSON file in assembly directory, then use ILayoutSupplier.GetMarkup to convert layout to TReplyMarkup object for use in SendOptionsBuilder."
+	},
+	{
+		"input": "How to send multiple messages with delay in a bot command processor?",
+		"output": "Loop through recipes collection, format each recipe as separate message, create SendMessageRequest for each, call SendMessage with request and options, then use Task.Delay(2000, token) between messages to avoid rate limiting."
+	},
+	{
+		"input": "How to process string arrays from message arguments in bot commands?",
+		"output": "Access message.ProcessingArgs[0], split by space to get individual items, convert to lowercase using ToLowerInvariant() for case-insensitive matching, then use in LINQ queries against database."
+	},
+	{
+		"input": "How to clean and format JSON array strings from database for display?",
+		"output": "Use Replace() methods to remove brackets and quotes from Ingredients and Directions fields: Replace('[', string.Empty).Replace(']', string.Empty).Replace('\\\"', string.Empty), then Split(',') to create individual items for display."
+	},
+	{
+		"input": "What's the purpose of SendOptionsBuilder in message sending?",
+		"output": "SendOptionsBuilder<TReplyMarkup> creates send options with reply markup (keyboards, buttons) that are passed to SendMessage method to control how messages are displayed and what interactive elements are available to users."
+	},
+	{
+		"input": "How to implement proper resource cleanup in command processors?",
+		"output": "Clear message.ProcessingArgs by setting to empty array after processing, use StringBuilder for efficient string construction, and ensure proper cancellation token propagation in async operations."
+	},
+	{
+		"input": "How to implement a simple stop command processor in Botticelli framework?",
+		"output": "Create a class inheriting from CommandProcessor<StopCommand> with generic TReplyMarkup constraint. Implement constructors that initialize layout options and override InnerProcess method to send farewell message when command is executed."
+	},
+	{
+		"input": "How to handle multiple constructor overloads in command processors?",
+		"output": "Provide multiple constructors with different parameter sets - one with minimal dependencies (logger, validator, layout suppliers) and another with additional MetricsProcessor. Both constructors should call base constructors and initialize common components through Init method."
+	},
+	{
+		"input": "How to initialize reply markup layouts in command processors?",
+		"output": "Create private Init method that uses Assembly.GetExecutingAssembly().Location to get assembly directory, ILayoutParser.ParseFromFile to load layout from JSON file, and ILayoutSupplier.GetMarkup to convert to TReplyMarkup for use in SendOptionsBuilder."
+	},
+	{
+		"input": "How to send farewell message when stopping a bot?",
+		"output": "In InnerProcess method, create SendMessageRequest with new Message containing unique Uid (Guid.NewGuid()), copy ChatIds from incoming message, set Body to 'Bot stopped...', and send using SendMessage with configured options."
+	},
+	{
+		"input": "How to handle different message types in a simple command processor?",
+		"output": "Override InnerProcessContact, InnerProcessPoll, and InnerProcessLocation methods to return Task.CompletedTask for message types that don't require specific handling in stop command context."
+	},
+	{
+		"input": "What's the difference between CommandProcessor and CommandChainProcessor?",
+		"output": "CommandProcessor is for single-step commands like StopCommand that execute immediately, while CommandChainProcessor is for multi-step conversational flows that require waiting for user responses and processing through multiple stages."
+	},
+	{
+		"input": "How to ensure proper message Uid generation in bot responses?",
+		"output": "Use Guid.NewGuid().ToString() to generate unique identifier for each outgoing message, ensuring proper message tracking and preventing duplicate processing in the messaging system."
+	},
+	{
+		"input": "How to reuse the same layout for different commands?",
+		"output": "Load layout from shared JSON file (like 'start_layout.json') in multiple command processors' Init methods, allowing consistent UI/UX across different bot commands while maintaining separation of concerns."
+	},
+	{
+		"input": "What dependencies are optional in command processor constructors?",
+		"output": "MetricsProcessor is optional and can be null, as shown by the question mark in MetricsProcessor? parameter and the constructor overload without it, providing flexibility depending on analytics requirements."
+	},
+	{
+		"input": "How to maintain chat context when sending response messages?",
+		"output": "Copy ChatIds from the incoming message to the response message to ensure the bot responds in the same chat context where the command was received, maintaining conversation continuity."
+	},
+	{
+		"input": "When to use Task.CompletedTask in message processing methods?",
+		"output": "Return Task.CompletedTask for overridden methods like InnerProcessContact, InnerProcessPoll, and InnerProcessLocation when the command doesn't need to handle those specific message types, providing empty but valid implementation."
+	},
+	{
+		"input": "How to structure command processors for different complexity levels?",
+		"output": "Use CommandProcessor for simple one-shot commands (like StopCommand) and CommandChainProcessor for complex multi-step interactions (like FindRecipeCommand), choosing based on whether the command requires conversational flow or immediate execution."
+	},
+	{
+		"input": "How to implement a start command processor with reply markup in Botticelli?",
+		"output": "Create a class inheriting from CommandProcessor<StartCommand> with TReplyMarkup constraint. Initialize SendOptionsBuilder with markup from layout file in constructors:\n\n```csharp\npublic class StartCommandProcessor<TReplyMarkup> : CommandProcessor<StartCommand> where TReplyMarkup : class\n{\n    private readonly SendOptionsBuilder<TReplyMarkup>? _options;\n\n    public StartCommandProcessor(ILogger<StartCommandProcessor<TReplyMarkup>> logger,\n        ICommandValidator<StartCommand> commandValidator,\n        ILayoutSupplier<TReplyMarkup> layoutSupplier,\n        ILayoutParser layoutParser,\n        IValidator<Message> messageValidator)\n        : base(logger, commandValidator, messageValidator)\n    {\n        var responseMarkup = Init(layoutSupplier, layoutParser);\n        _options = SendOptionsBuilder<TReplyMarkup>.CreateBuilder(responseMarkup);\n    }\n```\n\nOverride InnerProcess to send greeting message with the configured options."
+	},
+	{
+		"input": "How to initialize reply markup from JSON layout file in command processors?",
+		"output": "Create static Init method that loads layout from JSON file:\n\n```csharp\nprivate static TReplyMarkup Init(ILayoutSupplier<TReplyMarkup> layoutSupplier, ILayoutParser layoutParser)\n{\n    var location = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;\n    var responseLayout = layoutParser.ParseFromFile(Path.Combine(location, \"start_layout.json\"));\n    var responseMarkup = layoutSupplier.GetMarkup(responseLayout);\n    return responseMarkup;\n}\n```\n\nThis method uses Assembly.GetExecutingAssembly().Location to get assembly directory, ILayoutParser.ParseFromFile to load layout, and ILayoutSupplier.GetMarkup to convert to TReplyMarkup."
+	},
+	{
+		"input": "How to send greeting message when starting a bot?",
+		"output": "In InnerProcess method, create and send greeting message:\n\n```csharp\nprotected override async Task InnerProcess(Message message, CancellationToken token)\n{\n    var greetingMessageRequest = new SendMessageRequest\n    {\n        Message = new Message\n        {\n            ChatIds = message.ChatIds,\n            Body = \"Bot started...\"\n        }\n    };\n\n    await SendMessage(greetingMessageRequest, _options, token);\n}\n```\n\nCreate SendMessageRequest with new Message containing ChatIds from incoming message and Body set to greeting text."
+	},
+	{
+		"input": "How to handle unsupported message types in command processors?",
+		"output": "Override message type handlers to return Task.CompletedTask:\n\n```csharp\nprotected override Task InnerProcessContact(Message message, CancellationToken token) => Task.CompletedTask;\nprotected override Task InnerProcessPoll(Message message, CancellationToken token) => Task.CompletedTask;\nprotected override Task InnerProcessLocation(Message message, CancellationToken token) => Task.CompletedTask;\n```\n\nUsing expression-bodied members with => Task.CompletedTask for compact syntax, indicating these message types aren't handled."
+	},
+	{
+		"input": "What's the pattern for constructor overloading in command processors?",
+		"output": "Provide multiple constructors with different dependency sets:\n\n```csharp\n// Constructor without MetricsProcessor\npublic StartCommandProcessor(ILogger<StartCommandProcessor<TReplyMarkup>> logger,\n    ICommandValidator<StartCommand> commandValidator,\n    ILayoutSupplier<TReplyMarkup> layoutSupplier,\n    ILayoutParser layoutParser,\n    IValidator<Message> messageValidator)\n    : base(logger, commandValidator, messageValidator)\n{\n    var responseMarkup = Init(layoutSupplier, layoutParser);\n    _options = SendOptionsBuilder<TReplyMarkup>.CreateBuilder(responseMarkup);\n}\n\n// Constructor with optional MetricsProcessor\npublic StartCommandProcessor(ILogger<StartCommandProcessor<TReplyMarkup>> logger,\n    ICommandValidator<StartCommand> commandValidator,\n    ILayoutSupplier<TReplyMarkup> layoutSupplier,\n    ILayoutParser layoutParser,\n    IValidator<Message> messageValidator,\n    MetricsProcessor? metricsProcessor)\n    : base(logger, commandValidator, messageValidator, metricsProcessor)\n{\n    var responseMarkup = Init(layoutSupplier, layoutParser);\n    _options = SendOptionsBuilder<TReplyMarkup>.CreateBuilder(responseMarkup);\n}\n```\n\nBoth call appropriate base constructors and initialize markup options consistently."
+	},
+	{
+		"input": "How to implement a stop command processor similar to start command?",
+		"output": "Follow the same pattern as StartCommandProcessor but with StopCommand:\n\n```csharp\npublic class StopCommandProcessor<TReplyMarkup> : CommandProcessor<StopCommand> where TReplyMarkup : class\n{\n    private SendOptionsBuilder<TReplyMarkup>? _options;\n\n    public StopCommandProcessor(ILogger<StopCommandProcessor<TReplyMarkup>> logger,\n        ICommandValidator<StopCommand> commandValidator,\n        ILayoutSupplier<TReplyMarkup> layoutSupplier,\n        ILayoutParser layoutParser,\n        IValidator<Message> messageValidator)\n        : base(logger, commandValidator, messageValidator)\n    {\n        Init(layoutSupplier, layoutParser);\n    }\n\n    protected override async Task InnerProcess(Message message, CancellationToken token)\n    {\n        var farewellMessageRequest = new SendMessageRequest\n        {\n            Message = new Message\n            {\n                Uid = Guid.NewGuid().ToString(),\n                ChatIds = message.ChatIds,\n                Body = \"Bot stopped...\"\n            }\n        };\n        await SendMessage(farewellMessageRequest, _options, token);\n    }\n}\n```\n\nMain difference is the farewell message content and optional Uid generation."
+	},
+	{
+		"input": "How to implement a recipe search command processor with database queries?",
+		"output": "Create a CommandChainProcessor that searches recipes by ingredients:\n\n```csharp\npublic class GetRecipeCommandProcessor<TReplyMarkup> : CommandChainProcessor<FindRecipeCommand> where TReplyMarkup : class\n{\n    private readonly CookBookDbContext _context;\n    private readonly SendOptionsBuilder<TReplyMarkup>? _options;\n    \n    public GetRecipeCommandProcessor(ILogger<CommandChainProcessor<FindRecipeCommand>> logger,\n        ILayoutSupplier<TReplyMarkup> layoutSupplier,\n        ILayoutParser layoutParser,\n        ICommandValidator<FindRecipeCommand> commandValidator,\n        MetricsProcessor metricsProcessor,\n        IValidator<Message> messageValidator, CookBookDbContext context) : base(logger,\n        commandValidator,\n        metricsProcessor,\n        messageValidator)\n    {\n        _context = context;\n        var responseMarkup = Init(layoutSupplier, layoutParser);\n        _options = SendOptionsBuilder<TReplyMarkup>.CreateBuilder(responseMarkup);\n    }\n```\n\nInject CookBookDbContext for database access and initialize reply markup options."
+	},
+	{
+		"input": "How to process ingredient search arguments in a bot command?",
+		"output": "Extract and process ingredients from message arguments:\n\n```csharp\npublic override async Task ProcessAsync(Message message, CancellationToken token)\n{\n    if (message.ProcessingArgs == null || !message.ProcessingArgs.Any())\n        return;\n\n    var ingredients = message.ProcessingArgs[0].Split(\" \").Select(i => i.ToLowerInvariant());\n```\n\nSplit the first ProcessingArg by spaces and convert to lowercase for case-insensitive matching."
+	},
+	{
+		"input": "How to query database for recipes containing multiple ingredients?",
+		"output": "Use LINQ queries with grouping and filtering:\n\n```csharp\nvar ingredientIds = _context.Ingredients.Where(i => ingredients.Contains(i.Name)).Select(i => i.Id).ToList();\n\nvar recipeLinkGroups = _context.Ingredient2Recipes\n    .Where(i => ingredientIds.Contains(i.IngredientId))\n    .GroupBy(i => i.RecipeId)\n    .ToList();\n\nvar recipeIds = recipeLinkGroups.Where(g => ingredientIds.All(x => g.Any(tt => tt.IngredientId == x)))\n    .SelectMany(rid => rid.Select(i => i.RecipeId))\n    .AsEnumerable()\n    .Distinct();\n```\n\nThis finds recipes that contain ALL specified ingredients by grouping and filtering."
+	},
+	{
+		"input": "How to format recipe results with emojis and clean formatting?",
+		"output": "Use StringBuilder to create formatted recipe display:\n\n```csharp\nforeach (var recipe in recipes.AsEnumerable().OrderBy(o => Random.Shared.Next()).Take(3))\n{\n    var sb = new StringBuilder();\n    sb.Append($\"\\u2714\\u2714 {recipe.Title} \\u2714\\u2714\\n\");\n    sb.Append(\"\\nIngredients: \\n\");\n    sb.AppendJoin('\\n', recipe.Ingredients?.Replace(\"[\", string.Empty).Replace(\"]\", string.Empty)\n        .Replace(\"\\\"\", string.Empty).Split(\",\").Select(i => $\"\\u2705 {i};\")!);\n    sb.Append(\"\\nSteps: \\n\");\n    sb.AppendJoin('\\n', recipe.Directions?.Replace(\"[\", string.Empty).Replace(\"]\", string.Empty)\n        .Replace(\"\\\"\", string.Empty).Split(\",\").Select(d => $\"\\u2705  {d};\")!);\n    sb.Append($\"\\n{recipe.Link}\\n\\n\");\n    message.Body = sb.ToString();\n```\n\nClean JSON arrays and add checkmark emojis for better visual presentation."
+	},
+	{
+		"input": "How to handle no results found and send multiple recipe messages?",
+		"output": "Check for empty results and send multiple messages with delay:\n\n```csharp\nif (!recipes.Any())\n{\n    message.Body = \"🚫 No recipes were found!\";\n    \n    var messageRequest = new SendMessageRequest\n    {\n        Message = message\n    };\n    \n    await SendMessage(messageRequest, _options, token);\n}\n\nforeach (var recipe in recipes.AsEnumerable().OrderBy(o => Random.Shared.Next()).Take(3))\n{\n    // Format recipe...\n    var messageRequest = new SendMessageRequest\n    {\n        Message = message\n    };\n    \n    await SendMessage(messageRequest, _options, token);\n    await Task.Delay(2000, token);\n}\n```\n\nSend error message if no recipes found, otherwise send up to 3 random recipes with 2-second delays."
+	},
+	{
+		"input": "How to initialize layout markup in command chain processors?",
+		"output": "Use static Init method to load layout from JSON file:\n\n```csharp\nprivate static TReplyMarkup Init(ILayoutSupplier<TReplyMarkup> layoutSupplier, ILayoutParser layoutParser)\n{\n    var location = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;\n    var responseLayout = layoutParser.ParseFromFile(Path.Combine(location, \"start_layout.json\"));\n    var responseMarkup = layoutSupplier.GetMarkup(responseLayout);\n    return responseMarkup;\n}\n```\n\nGet assembly directory, parse layout file, and convert to reply markup for message options."
+	},
+	{
+		"input": "How to implement random recipe selection from search results?",
+		"output": "Use Random.Shared to shuffle recipes and take top results:\n\n```csharp\nforeach (var recipe in recipes.AsEnumerable().OrderBy(o => Random.Shared.Next()).Take(3))\n{\n    // Process each recipe...\n}\n```\n\nOrderBy with Random.Shared.Next() randomizes the order, then Take(3) selects first 3 for variety."
+	},
+	{
+		"input": "How to clean and process JSON array strings from database for display?",
+		"output": "Remove brackets and quotes from JSON arrays:\n\n```csharp\nrecipe.Ingredients?.Replace(\"[\", string.Empty).Replace(\"]\", string.Empty)\n    .Replace(\"\\\"\", string.Empty).Split(\",\").Select(i => $\"\\u2705 {i};\")\n```\n\nRemove [ ] brackets and quotes, then split by commas to create individual items with checkmark emojis."
+	},
+	{
+		"input": "How to set up monads-based command chains with Redis storage in Botticelli?",
+		"output": "Configure services with Redis storage and monads chain for command processing:\n\n```csharp\nvar builder = WebApplication.CreateBuilder(args);\n\nvar bot = builder.Services\n                 .AddTelegramBot(builder.Configuration)\n                 .Prepare();\n\nbuilder.Services\n    .AddLogging(cfg => cfg.AddNLog())\n    .AddTelegramLayoutsSupport();\n\nbuilder.Services\n    .AddChainedRedisStorage<string, string>(builder.Configuration)\n    .AddBotCommand<MathCommand>()\n    .AddMonadsChain<MathCommand, PassValidator<MathCommand>, ReplyKeyboardMarkup, ReplyTelegramLayoutSupplier>(builder.Services,\n                                                                                                                  cb => cb.Next<InputCommandProcessor<MathCommand>>()\n                                                                                                                          .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n                                                                                                                          .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n                                                                                                                          .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Cos)\n                                                                                                                          .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Abs)\n                                                                                                                          .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n                                                                                                                          .Next<OutputCommandProcessor<ReplyKeyboardMarkup, MathCommand>>());\n```\n\nThis sets up Redis storage for chain state and defines a mathematical processing pipeline."
+	},
+	{
+		"input": "How to create a mathematical processing pipeline with multiple transformations?",
+		"output": "Chain multiple TransformArgumentsProcessor with different math functions:\n\n```csharp\n.AddMonadsChain<MathCommand, PassValidator<MathCommand>, ReplyKeyboardMarkup, ReplyTelegramLayoutSupplier>(builder.Services,\n    cb => cb.Next<InputCommandProcessor<MathCommand>>()\n            .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n            .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n            .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Cos)\n            .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Abs)\n            .Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n            .Next<OutputCommandProcessor<ReplyKeyboardMarkup, MathCommand>>());\n```\n\nThis creates a pipeline: Input → Sqrt → Sqrt → Cos → Abs → Sqrt → Output"
+	},
+	{
+		"input": "How to configure Redis storage for command chain state management?",
+		"output": "Use AddChainedRedisStorage extension method:\n\n```csharp\nbuilder.Services\n    .AddChainedRedisStorage<string, string>(builder.Configuration)\n```\n\nThis provides Redis-based storage for maintaining chain processor state between steps, using string keys and values."
+	},
+	{
+		"input": "What's the structure of a monads-based command chain configuration?",
+		"output": "A monads chain consists of typed processors in sequence:\n\n```csharp\n.AddMonadsChain<TCommand, TValidator, TReplyMarkup, TLayoutSupplier>(services,\n    chainBuilder => chainBuilder\n        .Next<FirstProcessor>()\n        .Next<SecondProcessor>(config => { /* configuration */ })\n        .Next<ThirdProcessor>()\n        .Next<OutputProcessor>());\n```\n\nWhere TCommand is the command type, TValidator handles validation, TReplyMarkup defines UI elements, and TLayoutSupplier provides layout support."
+	},
+	{
+		"input": "How to configure TransformArgumentsProcessor with custom functions?",
+		"output": "Set the SuccessFunc property with mathematical operations:\n\n```csharp\n.Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Sqrt)\n.Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Cos)\n.Next<TransformArgumentsProcessor<MathCommand, double>>(tp => tp.SuccessFunc = Math.Abs)\n```\n\nEach processor applies its function to the arguments, transforming them through the chain."
+	},
+	{
+		"input": "What are the required service registrations for monads chain processing?",
+		"output": "Register essential services before the chain:\n\n```csharp\nbuilder.Services\n    .AddTelegramBot(builder.Configuration)\n    .Prepare()\n    .AddLogging(cfg => cfg.AddNLog())\n    .AddTelegramLayoutsSupport()\n    .AddChainedRedisStorage<string, string>(builder.Configuration)\n    .AddBotCommand<MathCommand>();\n```\n\nThis includes bot setup, logging, layout support, Redis storage, and command registration."
+	},
+	{
+		"input": "How does the monads chain flow work from input to output?",
+		"output": "The chain processes data sequentially through configured processors:\n\n```csharp\nInputCommandProcessor<MathCommand>()\n→ TransformArgumentsProcessor (Math.Sqrt)\n→ TransformArgumentsProcessor (Math.Sqrt) \n→ TransformArgumentsProcessor (Math.Cos)\n→ TransformArgumentsProcessor (Math.Abs)\n→ TransformArgumentsProcessor (Math.Sqrt)\n→ OutputCommandProcessor<ReplyKeyboardMarkup, MathCommand>()\n```\n\nEach processor receives data from the previous one, applies transformation, and passes to the next."
+	},
+	{
+		"input": "What types of processors are available in monads chains?",
+		"output": "Common processor types include:\n\n```csharp\nInputCommandProcessor<TCommand> - Handles initial input\nTransformArgumentsProcessor<TCommand, T> - Transforms arguments with functions\nOutputCommandProcessor<TReplyMarkup, TCommand> - Handles final output\n```\n\nThese can be chained together to create complex processing pipelines with state persistence."
+	},
+	{
+		"input": "How to persist intermediate state between processors without external storage?",
+		"output": "Keep intermediate state in the chain's context or in processor arguments passed along the pipeline:\n\ncsharp\n// Register services and command\nbuilder.Services\n    .AddTelegramBot(builder.Configuration)\n    .Prepare()\n    .AddLogging(cfg => cfg.AddNLog())\n    .AddBotCommand<MathCommand>();\n\n// Example chain using a context object passed between processors\nInputCommandProcessor<MathCommand>()\n→ TransformArgumentsProcessor<MathCommand, ProcessingContext>(args => {\n    // compute and store intermediate value in context\n    var ctx = new ProcessingContext { Value = args.Value, Intermediate = Math.Sqrt(args.Value) };\n    return ctx;\n})\n→ TransformArgumentsProcessor<MathCommand, ProcessingContext>(ctx => {\n    // use intermediate value computed earlier\n    ctx.Result = (ctx.Intermediate ?? 0) + ctx.Value;\n    return ctx;\n})\n→ OutputCommandProcessor<ReplyKeyboardMarkup, MathCommand>();\n\n// Context class\npublic class ProcessingContext\n{\n    public double Value { get; set; }\n    public double? Intermediate { get; set; }\n    public double Result { get; set; }\n}\n\n\nThis pattern uses typed context objects (or tuples) passed through processors to preserve intermediate results during processing."
+	},
+	{
+		"input": "How to initialize and reuse a prebuilt inline layout (interface elements like buttons) for repeated sends?",
+		"output": "Option 1 — Precompute layout once in constructor and reuse SendOptions:\n\ncsharp\n// constructor: prebuild layout (buttons, keyboard)\nInitLayouts(supplier);\n\nprivate void InitLayouts(ILayoutSupplier<InlineKeyboardMarkup> supplier)\n{\n    // 'layout' = interface elements (buttons)\n    var markup = supplier.GetMarkup(ModelForCurrentLocale());\n    _options = SendOptionsBuilder<InlineKeyboardMarkup>.CreateBuilder(markup);\n}\n\n// processor usage\nprotected override async Task InnerProcess(Message message, CancellationToken token)\n{\n    var request = CreateSendRequest(message);\n    await _bot.SendMessageAsync(request, _options, token);\n}\n\n\nOption 2 — Lazy initialize on first use (thread-safe):\n\ncsharp\nprivate SendOptionsBuilder<InlineKeyboardMarkup>? _options;\nprivate readonly object _lock = new();\n\nprivate SendOptionsBuilder<InlineKeyboardMarkup> GetOrCreateOptions(ILayoutSupplier<InlineKeyboardMarkup> supplier)\n{\n    if (_options != null) return _options;\n    lock (_lock)\n    {\n        if (_options == null)\n        {\n            var markup = supplier.GetMarkup(ModelForCurrentLocale()); // buttons built here\n            _options = SendOptionsBuilder<InlineKeyboardMarkup>.CreateBuilder(markup);\n        }\n    }\n    return _options;\n}\n\nprotected override async Task InnerProcess(Message message, CancellationToken token)\n{\n    var options = GetOrCreateOptions(_supplier);\n    var request = CreateSendRequest(message);\n    await _bot.SendMessageAsync(request, options, token);\n}\n\n\nChoose eager (constructor) when cost is low and lifetime predictable, or lazy when construction is expensive or rarely used."
+	},
+	{
+		"input": "How to decouple processor logic from layout (buttons/other interface elements) generation?",
+		"output": "Option 1 — Inject a layout supplier abstraction (produces interface elements) via DI:\n\ncsharp\n// processor receives ILayoutSupplier<TMarkup>\nvar markup = _layoutSupplier.GetMarkup(viewModel); // returns buttons/keyboard\nvar options = SendOptionsBuilder<TMarkup>.CreateBuilder(markup);\nawait _bot.SendMessageAsync(request, options, token);\n\n\nOption 2 — Move layout creation to a dedicated factory/service and inject either the factory or prebuilt SendOptions:\n\ncsharp\n// DI: ILayoutFactory or prebuilt SendOptions provided to processor\nawait _bot.SendMessageAsync(request, _prebuiltOptions, token);\n\n\nOption 3 — Use small adapter classes that map domain model -> markup (buttons), keeping processor focused on flow and validation."
+	},
+	{
+		"input": "How to validate incoming messages before building and sending a layout (buttons) to the user?",
+		"output": "Option 1 — Use injected validators inside the processor pipeline:\n\ncsharp\nif (!await _messageValidator.ValidateAsync(message))\n{\n    // reply error or short-circuit\n    return;\n}\n// build buttons/layout and send\n\n\nOption 2 — Validate earlier in a pipeline/middleware so handlers only receive valid messages:\n\ncsharp\n// middleware returns failure result -> handler not invoked\n\n\nOption 3 — Combine both: quick structural checks in pipeline + business-rule validation in handler before building the layout."
+	},
+	{
+		"input": "How should a command processor extract user-selected data from an inline layout and forward it as a message body?",
+		"output": "Option 1 — Read selected value from the incoming message payload, set it as the outgoing message body, and send using the bot:\n\ncsharp\nprotected override async Task InnerProcess(Message message, CancellationToken token)\n{\n    var request = new SendMessageRequest\n    {\n        ExpectPartialResponse = false,\n        Message = message\n    };\n\n    // extract selected value from message payload and place into outgoing message body\n    request.Message.Body = message.Payload?.GetArguments();\n    await _bot.SendMessageAsync(request, token);\n}\n\n\nOption 2 — Validate or normalize extracted data before sending (recommended):\n\ncsharp\nprotected override async Task InnerProcess(Message message, CancellationToken token)\n{\n    var raw = message.Payload?.GetArguments();\n    var normalized = string.IsNullOrWhiteSpace(raw) ? string.Empty : raw.Trim();\n\n    var request = new SendMessageRequest\n    {\n        ExpectPartialResponse = false,\n        Message = message\n    };\n\n    request.Message.Body = normalized;\n    await _bot.SendMessageAsync(request, token);\n}\n\n\nOption 3 — Map the selected data to a domain DTO for further processing before sending:\n\ncsharp\nprotected override async Task InnerProcess(Message message, CancellationToken token)\n{\n    var args = message.Payload?.GetArguments();\n    var dto = MapArgumentsToDto(args); // parse/validate into structured object\n\n    var request = new SendMessageRequest\n    {\n        ExpectPartialResponse = false,\n        Message = message\n    };\n\n    request.Message.Body = dto.ToJson();\n    await _bot.SendMessageAsync(request, token);\n}\n\n\nIn these examples \"payload\" denotes the part of the incoming message that carries the user's selection from the layout (interface elements like buttons); choose direct pass-through, light normalization, or structured mapping as needed."
+	},
+	{
+		"input": "Explain what the following C# BotticelliBots command processor does and list its dependencies.",
+		"output": "This CommandProcessor handles DateChosenCommand callbacks from an inline calendar. It extracts callback arguments, places them into the Message.Body, and sends a SendMessageRequest via IBot. Dependencies: IBot (to send messages), ICommandValidator (validates command), MetricsProcessor (analytics), ILogger (logging), IValidator (message validation)."
+	},
+	{
+		"input": "Refactor the processor to log the chosen date before sending the message.",
+		"output": "public class DateChosenCommandProcessor : CommandProcessor\n{\n    public DateChosenCommandProcessor(IBot bot, ICommandValidator commandValidator, MetricsProcessor metricsProcessor, ILogger logger, IValidator messageValidator) : base(logger, commandValidator, messageValidator, metricsProcessor) { }\n\n    protected override async Task InnerProcess(Message message, CancellationToken token)\n    {\n        var chosen = message.CallbackData?.GetArguments();\n        logger.LogInformation(\"Date chosen: {Date}\", chosen);\n\n        var request = new SendMessageRequest\n        {\n            ExpectPartialResponse = false,\n            Message = message\n        };\n\n        request.Message.Body = chosen;\n        await bot.SendMessageAsync(request, token);\n    }\n}"
+	},
+	{
+		"input": "Write a short README snippet describing how to wire this processor into the DI container.",
+		"output": "Register the processor and its dependencies in your Startup/Program:\n\nservices.AddSingleton<ICommandProcessor, DateChosenCommandProcessor>();\nservices.AddSingleton<ICommandValidator, DateChosenCommandValidator>();\nservices.AddSingleton();\nservices.AddSingleton<IValidator, MessageValidator>();\n// Ensure IBot and ILogger<> are registered by the Botticelli client packages."
+	},
+	{
+		"input": "Explain what the following C# BotticelliBots GetCalendarCommandProcessor does and list its dependencies.",
+		"output": "This processor builds an inline calendar layout and sends it to the user when handling GetCalendarCommand. It initializes a SendOptionsBuilder with an InlineKeyboardMarkup created by an ILayoutSupplier using CalendarFactory. On processing, it creates a SendMessageRequest (ExpectPartialResponse = false) and calls IBot.SendMessageAsync with the request and prebuilt send options. Dependencies: IBot, ICommandValidator, MetricsProcessor, ILayoutSupplier, ILogger, IValidator."
+	},
+	{
+		"input": "Refactor GetCalendarCommandProcessor to refresh the calendar markup each time InnerProcess is called instead of only in the constructor.",
+		"output": "public class GetCalendarCommandProcessor : CommandProcessor\n{\n    private readonly IBot _bot;\n    private readonly ILayoutSupplier _supplier;\n\n    public GetCalendarCommandProcessor(IBot bot,\n                                       ICommandValidator commandValidator,\n                                       MetricsProcessor metricsProcessor,\n                                       ILayoutSupplier supplier,\n                                       ILogger logger,\n                                       IValidator messageValidator)\n            : base(logger, commandValidator, messageValidator, metricsProcessor)\n    {\n        _bot = bot;\n        _supplier = supplier;\n    }\n\n    protected override async Task InnerProcess(Message message, CancellationToken token)\n    {\n        var markup = _supplier.GetMarkup(CalendarFactory.Get(DateTime.Now, CultureInfo.InvariantCulture.Name));\n        var options = SendOptionsBuilder.CreateBuilder(markup);\n\n        var request = new SendMessageRequest { ExpectPartialResponse = false, Message = message };\n        await _bot.SendMessageAsync(request, options, token);\n    }\n}"
+	},
+	{
+		"input": "Add logging to record when the calendar is generated and when the message is sent.",
+		"output": "protected override async Task InnerProcess(Message message, CancellationToken token)\n{\n    logger.LogInformation(\"Generating calendar markup for user {UserId}\", message.SenderId);\n    var markup = _supplier.GetMarkup(CalendarFactory.Get(DateTime.Now, CultureInfo.InvariantCulture.Name));\n    var options = SendOptionsBuilder.CreateBuilder(markup);\n\n    var request = new SendMessageRequest { ExpectPartialResponse = false, Message = message };\n\n    logger.LogInformation(\"Sending calendar message to user {UserId}\", message.SenderId);\n    await _bot.SendMessageAsync(request, options, token);\n}"
+	},
+	{
+		"input": "Create an xUnit test that verifies SendMessageAsync is called with non-null options.",
+		"output": "[Fact]\npublic async Task InnerProcess_UsesOptionsWhenSending()\n{\n    var botMock = new Mock();\n    var validatorMock = new Mock<ICommandValidator>();\n    var metrics = new MetricsProcessor();\n    var supplierMock = new Mock<ILayoutSupplier>();\n    supplierMock.Setup(s => s.GetMarkup(It.IsAny())).Returns(new InlineKeyboardMarkup(new [] { new [] { InlineKeyboardButton.WithCallbackData(\"1\") } }));\n    var logger = Mock.Of<ILogger>();\n    var messageValidator = Mock.Of<IValidator>();\n\n    var processor = new GetCalendarCommandProcessor(botMock.Object, validatorMock.Object, metrics, supplierMock.Object, logger, messageValidator);\n\n    var message = new Message { SenderId = 12345 };\n\n    await processor.InvokeInnerProcessForTest(message, CancellationToken.None);\n\n    botMock.Verify(b => b.SendMessageAsync(It.IsAny(), It.IsAny<SendOptionsBuilder>(), It.IsAny()), Times.Once);\n}"
+	},
+	{
+		"input": "Modify the processor to use the current culture name passed from the Message (Message.Locale) instead of CultureInfo.InvariantCulture.",
+		"output": "public class GetCalendarCommandProcessor : CommandProcessor\n{\n    private readonly IBot _bot;\n    private readonly ILayoutSupplier _supplier;\n\n    public GetCalendarCommandProcessor(IBot bot,\n                                       ICommandValidator commandValidator,\n                                       MetricsProcessor metricsProcessor,\n                                       ILayoutSupplier supplier,\n                                       ILogger logger,\n                                       IValidator messageValidator)\n            : base(logger, commandValidator, messageValidator, metricsProcessor)\n    {\n        _bot = bot;\n        _supplier = supplier;\n    }\n\n    protected override async Task InnerProcess(Message message, CancellationToken token)\n    {\n        var culture = string.IsNullOrEmpty(message.Locale) ? CultureInfo.InvariantCulture.Name : message.Locale;\n        var markup = _supplier.GetMarkup(CalendarFactory.Get(DateTime.Now, culture));\n        var options = SendOptionsBuilder.CreateBuilder(markup);\n\n        var request = new SendMessageRequest { ExpectPartialResponse = false, Message = message };\n        await _bot.SendMessageAsync(request, options, token);\n    }\n}"
+	},
+	{
+		"input": "Create a minimal GetCalendarCommand implementation that assigns a new Guid on construction.",
+		"output": "using Botticelli.Framework.Commands;\n\nnamespace TelegramInlineLayoutsSample.Commands;\n\npublic class GetCalendarCommand : ICommand\n{\n    public Guid Id { get; }\n\n    public GetCalendarCommand()\n    {\n        Id = Guid.NewGuid();\n    }\n}"
+	},
+	{
+		"input": "Explain how GetCalendarCommand might be used in a Botticelli bot flow.",
+		"output": "GetCalendarCommand represents a user's request to open a calendar UI. A command processor (ICommandProcessor) validates the command, builds an inline calendar layout (via ILayoutSupplier), wraps it in a SendMessageRequest with SendOptionsBuilder, and calls IBot.SendMessageAsync to deliver the calendar to the user."
+	},
+	{
+		"input": "Show a unit test (xUnit + Moq) that verifies a GetCalendarCommandProcessor handles the command by calling SendMessageAsync once.",
+		"output": "[Fact]\npublic async Task GetCalendarCommandProcessor_SendsCalendar()\n{\n    var botMock = new Mock();\n    var validatorMock = new Mock<ICommandValidator>();\n    var metrics = new MetricsProcessor();\n    var supplierMock = new Mock<ILayoutSupplier>();\n    supplierMock.Setup(s => s.GetMarkup(It.IsAny())).Returns(new InlineKeyboardMarkup(new[] { new[] { InlineKeyboardButton.WithCallbackData(\"1\") } }));\n    var logger = Mock.Of<ILogger>();\n    var messageValidator = Mock.Of<IValidator>();\n\n    var processor = new GetCalendarCommandProcessor(botMock.Object, validatorMock.Object, metrics, supplierMock.Object, logger, messageValidator);\n    var message = new Message { SenderId = 1, Locale = \"en-US\" };\n\n    await processor.InvokeInnerProcessForTest(message, CancellationToken.None);\n\n    botMock.Verify(b => b.SendMessageAsync(It.IsAny(), It.IsAny<SendOptionsBuilder>(), It.IsAny()), Times.Once);\n}"
+	},
+	{
+		"input": "Explain what builder.Services.AddTelegramBot(builder.Configuration).Prepare() does in this Program.cs and why it's needed.",
+		"output": "Registers and configures the Botticelli Telegram integration using app configuration, wiring platform adapters and required services (IBot, transport, serializers). Prepare() finalizes initial boot configuration so subsequent Botticelli DI extensions (commands, chains, parsers) can be registered against the prepared bot services."
+	},
+	{
+		"input": "List all commands and processors registered in this Program.cs, including chained flow and validators.",
+		"output": "Registered direct bot commands: InfoCommand -> InfoCommandProcessor (PassValidator), StartCommand -> StartCommandProcessor (PassValidator), StopCommand -> StopCommandProcessor (PassValidator). Registered processors (singletons): StartCommandProcessor, StopCommandProcessor, InfoCommandProcessor. Chain: GetNameCommand with PassValidator and processors sequence GetNameCommandProcessor -> SayHelloFinalCommandProcessor. The chain is bound to TelegramBot via RegisterBotChainedCommand<GetNameCommand, TelegramBot>()."
+	},
+	{
+		"input": "Describe the runtime behavior when a user triggers the GetNameCommand in this setup.",
+		"output": "When GetNameCommand is triggered the framework resolves the configured chain for that command and invokes processors in order: first GetNameCommandProcessor (e.g., prompts for user's name and stores session state), then when the user replies the framework routes the follow-up to SayHelloFinalCommandProcessor which reads stored state (or Message.Body) and sends a final response. Validators (PassValidator) run during dispatch; SendMessage/markup usage comes from registered processors and ILayoutParser as needed."
+	},
+	{
+		"input": "Give a one-line explanation of what StartCommandProcessor does.",
+		"output": "StartCommandProcessor responds to StartCommand by sending a fixed greeting message to the originating chat(s) and provides empty handlers for contact, poll, and location message types."
+	},
+	{
+		"input": "List the constructor dependencies required by StartCommandProcessor.",
+		"output": "ILogger<StartCommandProcessor>, ICommandValidator, IValidator — used for logging, command validation, and message validation."
+	},
+	{
+		"input": "Show a concise code change to make the greeting message include the sender id.",
+		"output": "protected override async Task InnerProcess(Message message, CancellationToken token)\n{\n    var greetingMessageRequest = new SendMessageRequest\n    {\n        Message = new Message\n        {\n            ChatIds = message.ChatIds,\n            Body = $\"Bot started for user {message.SenderId}. Please, wait for broadcast messages from admin...\"\n        }\n    };\n\n    await SendMessage(greetingMessageRequest, token);\n}"
+	},
+	{
+		"input": "Describe a minimal unit test to verify the greeting is sent when StartCommandProcessor handles StartCommand.",
+		"output": "Mock the bot/send mechanism, create a Message with ChatIds and SenderId, call InnerProcess (via test helper or making method accessible), and assert SendMessage was invoked with a SendMessageRequest whose Message.Body contains \"Bot started\" and ChatIds matches the input."
+	},
+	{
+		"input": "Suggest a small improvement to handle null ChatIds safely before sending the greeting.",
+		"output": "Before creating the request ensure ChatIds is non-null: var chatIds = message.ChatIds ?? new[] { message.SenderId }; then set Message.ChatIds = chatIds so the greeting always has at least the sender's chat id."
+	},
+	{
+		"input": "Appsettings Development (SQLite, local services, verbose logging)",
+		"output": "{\"Logging\":{\"LogLevel\":{\"Default\":\"Debug\",\"Microsoft.AspNetCore\":\"Warning\"}},\"DataAccess\":{\"ConnectionString\":\"dev_database.db;Password=devpass\"},\"Server\":{\"ServerUri\":\"http://localhost:5000/v1/\\\"},\\\"AnalyticsClient\\\":{\\\"TargetUrl\\\":\\\"http://localhost:5251/v1/\\\"},\\\"TelegramBot\\\":{\\\"timeout\\\":30,\\\"useThrottling\\\":false,\\\"useTestEnvironment\\\":true,\\\"name\\\":\\\"DevTestBot\\\"},\\\"Broadcasting\\\":{\\\"ConnectionString\\\":\\\"dev_broadcasting.db;Password=devpass\\\",\\\"BotId\\\":\\\"dev-chatbot\\\",\\\"HowOld\\\":\\\"00:05:00\\\",\\\"ServerUri\\\":\\\"http://localhost:5000/v1\\\"},\\\"AllowedHosts\\\":\\\"*\\\"}"
+	},
+	{
+		"input": "Appsettings Production (Postgres, HTTPS, throttling enabled)",
+		"output": "{\"Logging\":{\"LogLevel\":{\"Default\":\"Information\",\"Microsoft.AspNetCore\":\"Warning\"}},\"DataAccess\":{\"ConnectionString\":\"Host=db.prod.example;Database=app;Username=app;Password=securepass\"},\"Server\":{\"ServerUri\":\"https://api.example.com/v1/\\\"},\\\"AnalyticsClient\\\":{\\\"TargetUrl\\\":\\\"https://analytics.example.com/v1/\\\"},\\\"TelegramBot\\\":{\\\"timeout\\\":60,\\\"useThrottling\\\":true,\\\"useTestEnvironment\\\":false,\\\"name\\\":\\\"ProdBot\\\"},\\\"Broadcasting\\\":{\\\"ConnectionString\\\":\\\"Host=db.prod.example;Database=broadcast;Username=broad;Password=securepass\\\",\\\"BotId\\\":\\\"prod-chatbot\\\",\\\"HowOld\\\":\\\"01:00:00\\\",\\\"ServerUri\\\":\\\"https://api.example.com/v1\\\"},\\\"AllowedHosts\\\":\\\"api.example.com\\\"}"
+	},
+	{
+		"input": "Appsettings Staging (remote analytics, longer retention)",
+		"output": "{\"Logging\":{\"LogLevel\":{\"Default\":\"Information\",\"Microsoft.AspNetCore\":\"Warning\"}},\"DataAccess\":{\"ConnectionString\":\"staging_database.db;Password=stagingpass\"},\"Server\":{\"ServerUri\":\"https://staging.example.com/v1/\\\"},\\\"AnalyticsClient\\\":{\\\"TargetUrl\\\":\\\"https://staging-analytics.example.com/v1/\\\"},\\\"TelegramBot\\\":{\\\"timeout\\\":45,\\\"useThrottling\\\":true,\\\"useTestEnvironment\\\":true,\\\"name\\\":\\\"StagingBot\\\"},\\\"Broadcasting\\\":{\\\"ConnectionString\\\":\\\"staging_broadcasting.db;Password=stagingpass\\\",\\\"BotId\\\":\\\"staging-chatbot\\\",\\\"HowOld\\\":\\\"02:00:00\\\",\\\"ServerUri\\\":\\\"https://staging.example.com/v1\\\"},\\\"AllowedHosts\\\":\\\"staging.example.com\\\"}"
+	},
+	{
+		"input": "Appsettings  Container (in-memory DBs, simplified endpoints)",
+		"output": "{\"Logging\":{\"LogLevel\":{\"Default\":\"Warning\",\"Microsoft.AspNetCore\":\"Warning\"}},\"DataAccess\":{\"ConnectionString\":\":memory:\"},\"Server\":{\"ServerUri\":\"http://0.0.0.0:8080/v1/\\\"},\\\"AnalyticsClient\\\":{\\\"TargetUrl\\\":\\\"http://analytics:5251/v1/\\\"},\\\"TelegramBot\\\":{\\\"timeout\\\":15,\\\"useThrottling\\\":false,\\\"useTestEnvironment\\\":true,\\\"name\\\":\\\"ContainerBot\\\"},\\\"Broadcasting\\\":{\\\"ConnectionString\\\":\\\":memory:\\\",\\\"BotId\\\":\\\"container-chatbot\\\",\\\"HowOld\\\":\\\"00:01:00\\\",\\\"ServerUri\\\":\\\"http://0.0.0.0:8080/v1\\\"},\\\"AllowedHosts\\\":\\\"*\\\"}"
+	},
+	{
+		"input": "Appsettings — Debug (detailed logging, short timeouts for testing)",
+		"output": "{\"Logging\":{\"LogLevel\":{\"Default\":\"Debug\",\"Microsoft.AspNetCore\":\"Information\"}},\"DataAccess\":{\"ConnectionString\":\"debug_database.db;Password=debugpass\"},\"Server\":{\"ServerUri\":\"http://localhost:7000/v1/\\\"},\\\"AnalyticsClient\\\":{\\\"TargetUrl\\\":\\\"http://localhost:5252/v1/\\\"},\\\"TelegramBot\\\":{\\\"timeout\\\":5,\\\"useThrottling\\\":false,\\\"useTestEnvironment\\\":true,\\\"name\\\":\\\"DebugBot\\\"},\\\"Broadcasting\\\":{\\\"ConnectionString\\\":\\\"debug_broadcasting.db;Password=debugpass\\\",\\\"BotId\\\":\\\"debug-chatbot\\\",\\\"HowOld\\\":\\\"00:00:30\\\",\\\"ServerUri\\\":\\\"http://localhost:7000/v1\\\"},\\\"AllowedHosts\\\":\\\"*\\\"}"
+	}
 ]
